@@ -155,6 +155,10 @@ enum Commands {
     #[command(subcommand)]
     Anomaly(commands::anomaly::AnomalyCommands),
 
+    /// Audit Stellar protocol, Soroban RPC, XDR, and project compatibility
+    #[command(subcommand)]
+    Compatibility(commands::compatibility::CompatibilityCommands),
+
     /// Reproducible release builds, SBOM generation, signing, and
     /// provenance verification
     #[command(subcommand)]
@@ -197,8 +201,7 @@ fn main() {
             if args.format == "json"
     ) || matches!(&cli.command, Commands::Account(cmd) if commands::account::is_machine_readable(cmd))
         || matches!(&cli.command, Commands::Query(cmd) if commands::query::is_machine_readable(cmd))
-        || matches!(&cli.command, Commands::Compatibility(cmd) if commands::compatibility::is_machine_readable(cmd))
-        || matches!(&cli.command, Commands::Compatibility(cmd) if commands::compatibility::is_machine_readable(cmd))
+        || matches!(&cli.command, Commands::Ai(args) if args.is_machine_readable())
         || matches!(&cli.command, Commands::Compatibility(cmd) if commands::compatibility::is_machine_readable(cmd))
         || matches!(&cli.command, Commands::Interop(cmd) if commands::interop::is_machine_readable(cmd));
 
@@ -263,6 +266,7 @@ fn main() {
         Commands::Profile(_) => "profile",
         Commands::Anomaly(_) => "anomaly",
         Commands::Compatibility(_) => "compatibility",
+        Commands::Release(_) => "release",
         Commands::Interop(_) => "interop",
         Commands::External(_) => "external",
     }
@@ -313,6 +317,7 @@ fn main() {
             .context("Failed to create async runtime")
             .and_then(|rt| rt.block_on(commands::anomaly::handle(cmd))),
         Commands::Compatibility(cmd) => commands::compatibility::handle(cmd),
+        Commands::Release(cmd) => commands::release::handle(cmd),
         Commands::Interop(cmd) => commands::interop::handle(cmd),
         Commands::External(args) => handle_external_plugin(args),
     };
